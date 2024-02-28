@@ -1,0 +1,163 @@
+{% extends "baza.html" %}
+{% block ssilki %}
+<script src="https://mangavost.org/player/playerjs.js?v=119" type="text/javascript"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		 <script type="text/javascript" charset="utf-8" src="https://yandex.ru/ads/system/adsdk.js"></script>
+{% endblock %}
+{% block content %}
+<br><br><br>  
+<div class='nameAndChapters'>
+  <div class="onlyNameAndChapters">
+    <a href="{{url_for('showTitle',nazvanie=dlyaUrl)}}"><h2>{{title}}</h2></a>
+    <button id="toggleButton">&#9776;</button>
+  </div>
+  <div id="sidebarGlavi">
+    <div class="sidebar-header">
+      <span>Список серий</span>
+      <button id="closeButton">&times;</button>
+    </div>
+    <ul>
+      {% for glava in glavi %}
+      {% if 'серия' in glava[1] %}
+        {% if cur_glava==glava[1] %}
+        <a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=glava[0])}}"><li style='background-color:#f0f0f0'>{{glava[1]}}{% if readed_chapters%}{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{%endif%}{% endfor %}{%endif%}</li></a>
+        {% else %}
+        <a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=glava[0])}}"><li>{{glava[1]}}{% if readed_chapters%}{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{%endif%}{% endfor %}{%endif%}</li></a>
+        {% endif %}
+      {% else %}
+        {% if cur_glava==glava[1] %}
+        <a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=glava[0])}}"><li style='background-color:#f0f0f0'><i>{{glava[1]}}</i>{% if readed_chapters%}{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{%endif%}{% endfor %}{%endif%}</li></a>
+        {% else %}
+        <a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=glava[0])}}"><li><i>{{glava[1]}}</i>{% if readed_chapters%}{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{%endif%}{% endfor %}{%endif%}</li></a>
+        {% endif %}
+      {% endif %}
+      {% endfor %}
+    </ul>
+    <br><br><br>
+  </div>
+</div>
+
+
+{{html_code|safe}}
+<div style='display:flex;justify-content:space-evenly'>
+{% if nomer>1 %}
+<a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer-1)}}">
+  <div class="prevGlava">
+      <b>Предыдущая серия</b>
+  </div>
+</a>
+{% else %}
+<a style='visibility:hidden' href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer-1)}}">
+  <div class="prevGlava">
+      <b>Предыдущая серия</b>
+  </div>
+</a>
+{% endif %}
+{% if nomer==last_glava %}
+<a style='visibility:hidden' href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer-1)}}">
+  <div class="prevGlava">
+      <b>Предыдущая серия</b>
+  </div>
+</a>
+{% endif %}
+{% if nomer!=last_glava and nomer!=1 %}
+<a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer+1)}}">
+  <div  class="nextGlava1">
+      <b>Следующая серия</b>
+  </div>
+</a>
+{% endif %}
+{% if nomer!=last_glava and nomer==1 %}
+<a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer+1)}}">
+  <div  class="nextGlava1">
+      <b>Следующая серия</b>
+  </div>
+</a>
+{% endif %}
+</div>
+<div>
+<section class="content-item" id="comments">
+  <div class="container">   
+    <div class="row">
+          <div class="col-sm-8">   
+              <form method="POST">
+                <h3 class="pull-left">Новый коммент</h3>
+                  <fieldset>
+                      <div class="row">
+                          <div class="col-sm-3 col-lg-2 hidden-xs">
+                            {% if current_user.get_profilePic()=='https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Circle-icons-profile.svg/1200px-Circle-icons-profile.svg.png' %}
+                            <img class="user_pfp" src="{{current_user.get_profilePic()}}" alt="">
+                            {% else %}
+                            <img class="user_pfp" src="..\..\{{current_user.get_profilePic()}}" alt="">
+                            {% endif %}
+                          </div>
+                          <div class="form-group col-xs-12 col-sm-9 col-lg-10">
+                              <textarea name='comment_input' class="form-control" id="message" placeholder="Ваш коммент"  oninput="autoResize()" style='resize:none;overflow-y:hidden' required=""></textarea>
+                          </div>
+                      </div>  	
+                  </fieldset>
+                  <button type="submit" class="btn btn-normal pull-right">Отправить</button>
+              </form>
+              
+              {% if comments %}
+              <h3>{{kolvo_com}} коммента</h3>
+              {% for c in comments %}
+              <div class="media">
+                {% if c[1] %}
+                <a class="pull-left" href="{{url_for('showProfile',username=c[0])}}"><img class="media-object" src="..\..\{{c[1]}}" alt=""></a>
+                {% else %}
+                <a class="pull-left" href="{{url_for('showProfile',username=c[0])}}"><img class="media-object" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Circle-icons-profile.svg/1200px-Circle-icons-profile.svg.png" alt=""></a>
+                {% endif %}
+                  <div class="media-body">
+                      <h4 class="media-heading">{{c[0]}}</h4>
+                      <p>{{c[2].replace('\n', '<br>')|safe}}</p>
+                      <ul class="list-unstyled list-inline media-detail pull-left">
+                          <li><i class="fa fa-calendar"></i>{{c[3]}}</li>
+                      </ul>
+                      {% if current_user.get_username()==c[0] or current_user.get_status()=='Админ' %}
+                      <button style="color: red;border:none;background-color:inherit" class="deleteBtn pull-right" data-comment-id="{{ c[4] }}">Удалить</button>
+                      {% endif %}
+                  </div>
+              </div>
+              {% endfor %}
+              {% endif %}
+          </div>
+      </div>
+  </div>
+</section>
+<script>
+    function autoResize() {
+      const textarea = document.getElementById("message");
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+    }
+    const toggleButton = document.getElementById('toggleButton');
+    const closeButton = document.getElementById('closeButton');
+    const sidebarGlavi = document.getElementById('sidebarGlavi');
+  
+    toggleButton.addEventListener('click', function() {
+      sidebarGlavi.style.right = '0';
+    });
+  
+    closeButton.addEventListener('click', function() {
+      sidebarGlavi.style.right = '-100%';
+    }); 
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.deleteBtn').forEach(function(button) {
+            button.addEventListener('click', function() {
+                var commentId = this.getAttribute('data-comment-id');
+  
+                fetch('/delete_comment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ comment_id: commentId }),
+                });
+            });
+        });
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends "baza.html" %}
+{% block content %}
+<br><br><br><br><br><br>
+<div class="form-style-5">
+  <form name="ogo" method="POST">
+    {% for category,msg in get_flashed_messages(True) %}
+    <div class='flash {{category}}'>{{msg}}</div>
+    {% endfor %}
+  <fieldset>
+  <legend><span class="number">1</span> Добавить мангу</legend>
+  <input type="text" name="name_on_rus" id="logName" placeholder="Название на русском">
+  <input type="text" name="name_on_eng" id="logName1" placeholder="Название на английском">
+  <input type="text" name="href" id="logName2" placeholder="Ссылка">   
+  </fieldset>
+  <input type="submit" value="Добавить" />
+  </form>
+  </div>
+  <br>
+<div class="form-style-5">
+  <form name="ogo" method="POST" action='changeStatus'>
+  <fieldset>
+  <legend><span class="number">2</span> Поменять статус пользователя</legend>
+  <label for="job">Пользователи:</label>
+  <input type="text" id="searchInput" onkeyup="filterUsers()" oninput="updateSelection()" placeholder="Поиск пользователя...">
+  <select id="job" name="selectedUser" onchange="updateInput()">
+    <optgroup label="Пользователи">
+      {% for u in users %}
+        <option value="{{ u[1] }}">{{ u[1] }}</option>
+      {% endfor %}
+    </optgroup>
+  </select>
+  <label for="job1">Статус:</label>
+  <select id="job1" name="selectedStatus">
+    <optgroup label="Статус">
+      <option value="Админ">Админ</option>
+      <option value="Участник">Участник</option>
+      <option value="Забанен">Забанен</option>
+    </select>      
+  </fieldset>
+  <input type="submit" value="Изменить" />
+  </form>
+  </div>
+<script>
+  function filterUsers() {
+    var input, filter, select, options, option, i, txtValue;
+    input = document.getElementById('searchInput');
+    filter = input.value.toUpperCase();
+    select = document.getElementById('job');
+    options = select.getElementsByTagName('option');
+  
+    for (i = 0; i < options.length; i++) {
+      option = options[i];
+      txtValue = option.textContent || option.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        option.style.display = '';
+      } else {
+        option.style.display = 'none';
+      }
+    }
+  }
+  
+  function updateInput() {
+    var select = document.getElementById('job');
+    var input = document.getElementById('searchInput');
+    var selectedOption = select.options[select.selectedIndex].text;
+    input.value = selectedOption;
+  }
+  
+  function updateSelection() {
+    var input = document.getElementById('searchInput').value.toUpperCase();
+    var select = document.getElementById('job');
+    var options = select.getElementsByTagName('option');
+  
+    for (var i = 0; i < options.length; i++) {
+      var txtValue = options[i].textContent || options[i].innerText;
+      if (txtValue.toUpperCase().indexOf(input) > -1) {
+        select.selectedIndex = i;
+        break;
+      }
+    }
+  }
+  
+</script>
+{%endblock%}

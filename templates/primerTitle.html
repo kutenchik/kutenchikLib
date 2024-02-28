@@ -1,0 +1,145 @@
+{% extends "baza.html" %}
+{% block ssilki %}
+<link rel="icon" href='..\\static/uploads/kutenchikLib.jpg'>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="main">
+            <div class="seriesOverview">
+                <div>
+                    <img align="bottom" src="{{cover}}" class="img-r">
+                    <div>
+                    {% if lastChapter %}
+                    <a style='margin-left:15px;width:250px' class='nextGlava' href="{{ url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=lastChapter) }}">
+                        <div style='width:250px' class='nextGlava'>
+                            <b>{%if 'серия' in glavi[::-1][0][1] %}Продолжить просмотр{%else%}Продолжить чтение{%endif%}</b>
+                        </div>
+                    </a>
+                    {% else %}
+                    <a style='margin-left:15px;width:250px' class='nextGlava' href="{{ url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=1) }}">
+                        <div style='width:250px' class='nextGlava'>
+                            <b>{%if 'серия' in glavi[::-1][0][1] %}Смотреть с 1 серии{%else%}Читать с первой главы{%endif%}</b>
+                        </div>
+                    </a>
+                    {% endif %}
+                    <br><br>
+                    <form style='margin-left:15px' method="post" action="{{ url_for('toggle_favorite', title_id=id) }}">
+                        {% if is_favorite %}
+                            <input type="hidden" name="action" value="remove">
+                            <input style='width:250px;border:none' class='nextGlava' type="submit" value="Удалить из избранного">
+                        {% else %}
+                            <input type="hidden" name="action" value="add">
+                            <input style='width:250px;border:none' class='nextGlava' type="submit" value="Добавить в избранное">
+                        {% endif %}
+                    </form>
+                    </div>
+                </div>
+                <div class="name">
+                    <h1>{{title}}</h1>
+                    <article>Год:{{year}}</article>
+                    <article>Жанры: <i>{% for g in genres %} {{g}} {% endfor %}</i></article>
+                    <div class="containerz">
+                        <input id="input-1" name="input-1" class="rating rating-loading" data-min="0" data-max="5" data-step="0.1" value="{{ rating|default(0) }}">
+                        <button style='width:100px' class='nextGlava' onclick="submitRating()">Оценить</button>
+                    </div>
+                    <p>{{description}}</p>
+                    <article>Число просмотров:{{prosmotri}}</article>
+                </div>
+            </div>
+            <br>
+            <h2>Также рекомендуем</h2>
+            <div class="element-slider">
+                <div class="manga-container">
+                    {% for t in recomend_titles %}
+                    <div class="manga">
+                    <div style='height:360px' class="grid-item">
+                        <a class='image-con' href="{{url_for('showTitle',nazvanie=t[3])}}">
+                          <img src="{{t[2]}}" class="grid-img item" alt="image">
+                          {% for a in amount_of_views %}
+                          {% if a.split(';')[0][:-1]==t[0] or a.split(';')[0]==t[0] %}
+                          <span class="view-count">{{a.split(';')[1]}} просмотров</span>
+                          {% endif %}
+                          {% endfor %}
+                        </a>
+                        <div class="card_content">{{t[0]}}</div>
+                    </div>
+                </div>
+                    {% endfor %}
+                </div>
+                <button class="sled_elem">&#8249;</button>
+                <button class="prosh_elem">&#8250;</button>
+              </div>
+            <br><br>
+            <div class="chapter-view">
+                <div class="title"><h1>{%if 'серия' in glavi[::-1][0][1] %}Серии{%else%}Главы{%endif%}</h1></div>
+                <div class="container-glavi" style="display: inline-block;">
+                    <div class="center">
+                        <ul>
+                            {% for glava in glavi %}
+    {% set truncated_title = glava[1][:50] if glava[1]|length > 50 else glava[1] %}
+    {% set displayed_title = truncated_title + '...' if glava[1]|length > 50 else truncated_title %}
+    {% if 'Глава' or 'серия' in glava[1] %}
+        <li><a href="{{ url_for('showGlava', nazvanie=dlyaUrl, nomer_glavi=glava[0]) }}">{{ displayed_title }}</a>{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{% endif %}{% endfor %}</li>
+    {% else %}
+        <li><a href="{{ url_for('showGlava', nazvanie=dlyaUrl, nomer_glavi=glava[0]) }}"><i>{{ displayed_title }}</i></a>{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{% endif %}{% endfor %}</li>
+    {% endif %}
+{% endfor %}
+
+                        </ul>
+                    </div>
+                </div>
+                      </div>
+                      
+            
+        </div>
+        </div>
+        </div>
+        </div>
+        <script>
+            function submitRating() {const inputValue = document.getElementById('input-1').value; // Получаем значение из input
+
+            fetch(`/titles/{{ id }}/rate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 'rating': inputValue }),
+            })
+            .then(response => {
+                // Добавьте обработку успешного ответа сервера здесь, если нужно
+                console.log('Rating submitted successfully');
+            })
+            .catch(error => {
+                // Добавьте обработку ошибки при отправке рейтинга на сервер, если нужно
+                console.error('Error submitting rating:', error);
+            });
+        }
+        </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const elementSlider = document.querySelector('.element-slider');
+        const mangaContainer = document.querySelector('.manga-container');
+        const mangas = document.querySelectorAll('.manga');
+        const sledElem = document.querySelector('.sled_elem');
+        const proshElem = document.querySelector('.prosh_elem');
+    
+        let mangaWidth = mangas[0].clientWidth;
+        let currentIndex = 0;
+        let slidesToShow = Math.floor(elementSlider.clientWidth / mangaWidth);
+        
+        proshElem.addEventListener('click', function() {
+          if (currentIndex < mangas.length - slidesToShow) {
+            currentIndex++;
+            mangaContainer.style.transform = `translateX(-${mangaWidth * currentIndex}px)`;
+          }
+        });
+    
+        sledElem.addEventListener('click', function() {
+          if (currentIndex > 0) {
+            currentIndex--;
+            mangaContainer.style.transform = `translateX(-${mangaWidth * currentIndex}px)`;
+          }
+        });
+      });
+</script>
+{% endblock %}

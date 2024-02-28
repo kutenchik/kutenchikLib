@@ -1,0 +1,30 @@
+{% extends "baza.html" %}
+{% block ssilki %}
+<link rel="stylesheet" href="{{ url_for('static',filename='css/reg.css') }}">
+{% endblock %}
+{% block content %}
+<br><br><br><br>
+
+    <div class="box">
+
+        <img src="https://www.clipartmax.com/png/full/267-2671061_y%C3%BCkle-youssefdibeyoussefdibe-profile-picture-user-male.png">
+        <div class="page">
+            <div class="header">
+                <a id="login" href="{{url_for('login')}}">Войти</a>
+                <a id="signup" class="active"  href="{{url_for('registration')}}">Регистрация</a>
+            </div>
+            {% for category,msg in get_flashed_messages(True) %}
+            <div class='flash {{category}}'>{{msg}}</div>
+            {% endfor %}
+            <div class="content">
+                <form class="signup" name="signupForm" method="POST">
+                    <input type="text" name="username" id="signName" placeholder="Имя пользователя">
+                    <input type="email" name="email" id="signEmail" placeholder="Email">
+                    <input type="password" name="password" id="signPassword" placeholder="Пароль"><br>
+                    <input type="submit" value="Зарегистрироваться">
+                </form>
+            </div>
+        </div>
+    </div>
+    <br><br><br><br>
+{% endblock %}

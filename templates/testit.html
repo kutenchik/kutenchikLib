@@ -1,0 +1,112 @@
+{% extends "baza.html" %}
+{% block ssilki %}
+<script src="https://mangavost.org/player/playerjs.js?v=119" type="text/javascript"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		 <script type="text/javascript" charset="utf-8" src="https://yandex.ru/ads/system/adsdk.js"></script>
+{% endblock %}
+{% block content %}
+<style>
+
+</style>
+<br><br><br><br>
+<div id="videoplayer482" style="width:90%;height:100px;margin-left: auto;margin-right: auto;"></div><div id="video_ad" style="width:100%;height:100%;  display:none; background:red">
+  <video controls="" id="video_ad_v" style="width:100%;height:100%;">
+  <source src="#" type="video/mp4"/>
+  </video>
+  </div><script>
+  $( document ).ready(function() {
+    
+    
+    var player = new Playerjs({
+      id:"videoplayer482", file:"https://mangavost.org/content/stream/neveroyatnye_priklyucheniya_dzhodzho_pyatyj_sezon//006_482/hls/index.m3u8"
+    });
+    
+    
+    var video1 = document.querySelectorAll('video')[0]; // Ролик 
+    
+    var video2 = document.querySelectorAll('video')[1];
+    var slot = document.getElementById('video_ad');
+    var ad_blocker = 1;
+     
+    
+    video1.addEventListener('play', (event) => {
+      console.log('PLAY');
+    
+      if(ad_blocker){
+        ad_blocker = 0;
+         
+        if( $('.ad-detect').css('display') == 'inline'){
+           
+          video1.pause();
+          StartAdd();
+        }
+      }
+    });
+  
+     
+  
+  function StartAdd(){
+    
+  
+  ya.videoAd
+      .loadModule('AdLoader')    
+      .then(function(module) {
+          return module.AdLoader.create(
+              {
+                  partnerId: 1964006,
+                  category:  0
+          
+              },
+          );
+      })   
+      .then(function(adLoader) {
+          return adLoader.loadAd();
+      })
+      .then(function(adStore) {
+           
+          const adPlaybackController = adStore.createPlaybackController(video2, slot); //Viewer
+           
+          adPlaybackController.subscribe('AdStopped', function() {
+              console.log('Ad stopped playing');
+        
+        $("#videoplayer482").css('display', 'block');
+        $("#video_ad").css('display', 'none');
+        video1.play();
+        player.api("play");
+         
+          });
+          $("#videoplayer482").css('display', 'none');
+    $("#video_ad").css('display', 'block');
+          adPlaybackController.playAd();
+      })
+      .catch(function(error) {
+          console.error(error);
+      $("#videoplayer482").css('display', 'block');
+      $("#video_ad").css('display', 'none');
+      video1.play();
+      player.api("play");
+      });    
+  
+  }  
+  
+  
+  
+  
+  });
+  
+   
+  </script>
+    <div style='display:flex;justify-content:space-evenly'>
+      <a>
+        <div class="prevGlava">
+            <b>Предыдущая глава</b>
+        </div>
+      </a>
+      <a>
+        <div  class="nextGlava1">
+            <b>Следующая глава</b>
+        </div>
+      </a> 
+
+    
+{% endblock content %}

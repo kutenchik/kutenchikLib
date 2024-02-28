@@ -1,0 +1,192 @@
+{% extends "baza.html" %}
+{% block ssilki %}
+<link href="{{ url_for('static',filename='css/profile.css') }}" rel="stylesheet">
+{% endblock %}
+{% block content %}
+<center>
+<div class="main main-raised">
+<div class="profile-content">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 ml-auto mr-auto">
+               <div class="profile">
+                    <div class="avatar">
+                        {% if profile_pic %}
+<img class='pic_in_profile' src='{{profile_pic}}'>
+{% else %}
+<img class='pic_in_profile' src='https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Circle-icons-profile.svg/1200px-Circle-icons-profile.svg.png'>
+{% endif %}
+<div class='level'>
+    <div class='level_and_exp'>
+        <h4>Уровень: {{level}}</h4>
+        <p>{{rem_exp}}/{{lvl_porog}}</p>
+    </div>
+<div id="progressBar">
+  <div id="progress"></div>
+</div>
+</div><br>
+
+                    </div>
+                    <form action="{{ url_for('profile') }}" enctype="multipart/form-data" method="POST">
+                        <input id='input-file' name="img" type="file" style='display: none;' />
+                        <label id='input-file-label' for='input-file'>Выбрать фотографию</label>
+                        <h3 name='description' id="description" onclick="editDescription()">{{description| safe}}</h3>
+                        <textarea id="descriptionTextarea" name="description" oninput="autoResize()" style="display: none;resize:none"></textarea>
+                        <input type="submit" value='Сохранить' />
+                    </form>
+                    
+                    <div class="name">
+                        <h3 class="title">{{current_user.get_username()}}</h3>
+                        <h3>Статус: {{current_user.get_status()}}</h3>
+                        <h6>ID пользователя:{{user_id}}</h6>
+                        <h6><a href="{{url_for('logout')}}">Выйти</a></h6>
+                    </div>
+                   
+                </div>
+                
+            </div>
+        </div>
+        <h2>Достижения:</h2>
+        {% if user_achievements %}
+        <div class="achievements-container">
+        {% for ach in user_achievements %}
+            <div class="achievement">
+                <img src="../{{ach[2]}}" alt="{{ach[0]}}" class="achievement-icon">
+                <h3 class="achievement-title">{{ach[0]}}</h3>
+                <p class="achievement-description">{{ach[1]}}</p>
+            </div>
+        
+        {% endfor %}
+        
+    </div>
+    {%else%}
+    
+    <h2>Пусто</h2>
+        {% endif %}
+        {% if last_seen %}
+        <div class='row'>
+    <div class="container">
+        <div class="seeAll">
+            <div class="topic">Недавно просмотренные</div>
+        </div>
+        <hr>
+        <div class="grid-container">
+            {% for t in last_seen %}
+                <div class="grid-item">
+                    <a class='image-con' href="{{url_for('showTitle',nazvanie=t[2])}}">
+                      <img src="{{t[1]}}" class="grid-img item" alt="image">
+                      {% for a in amount_of_views %}
+                      {% if a.split(';')[0]==t[0] %}
+                      <span class="view-count">{{a.split(';')[1]}} просмотров</span>
+                      {% endif %}
+                      {% endfor %}
+                    </a>
+                    <div class="card_content">{{t[0]}}</div>
+                    <div class='infaPriNavodke'>
+                        <h2>{{t[0]}}</h2>
+                        <p>Год:<b class='text_v_infa_pri_navodke'>{{t[6]}}</b></p>
+                        <p>Жанры:<b class='text_v_infa_pri_navodke'>{%for g in t[3].split(';')%}{{g}} {%endfor%}</b></p>
+                        <p>Глав:<b class='text_v_infa_pri_navodke'>{{t[5]}}</b></p>
+                        <div class="containerz">
+                            {% if t[8] is none %}
+                            <input id="input-1" name="input-1" class="rating rating-loading" data-min="0" data-max="5" data-step="0.1" value="0">
+                            {% else %}
+                            <input id="input-1" name="input-1" class="rating rating-loading" data-min="0" data-max="5" data-step="0.1" value="{{ t[8]|default(0) }}">
+                            {% endif %}
+                        </div>
+                        <p id="description">{{ t[7][:300] if t[7]|length > 300 else t[7] }}{% if t[7]|length > 300 %}...{% endif %}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {%else%}
+        <br><br><br><br>
+        {% endif%}
+
+    </div>
+    {% if fav %}
+    <div class='row'>
+    <div class="container">
+        <div class="seeAll">
+            <div class="topic">Избранное</div>
+        </div>
+        <hr>
+        <div class="grid-container">
+            {% for t in fav %}
+                <div class="grid-item">
+                    <a class='image-con' href="{{url_for('showTitle',nazvanie=t[2])}}">
+                      <img src="{{t[1]}}" class="grid-img item" alt="image">
+                      {% for a in amount %}
+                      {% if a.split(';')[0]==t[0] %}
+                      <span class="view-count">{{a.split(';')[1]}} просмотров</span>
+                      {% endif %}
+                      {% endfor %}
+                    </a>
+                    <div class="card_content">{{t[0]}}</div>
+                    <div class='infaPriNavodke'>
+                        <h2>{{t[0]}}</h2>
+                        <p>Год:<b class='text_v_infa_pri_navodke'>{{t[6]}}</b></p>
+                        <p>Жанры:<b class='text_v_infa_pri_navodke'>{%for g in t[3].split(';')%}{{g}} {%endfor%}</b></p>
+                        <p>Глав:<b class='text_v_infa_pri_navodke'>{{t[5]}}</b></p>
+                        <div class="containerz">
+                            {% if t[8] is none %}
+                            <input id="input-1" name="input-1" class="rating rating-loading" data-min="0" data-max="5" data-step="0.1" value="0">
+                            {% else %}
+                            <input id="input-1" name="input-1" class="rating rating-loading" data-min="0" data-max="5" data-step="0.1" value="{{ t[8]|default(0) }}">
+                            {% endif %}
+                        </div>
+                        <p id="description">{{ t[7][:300] if t[7]|length > 300 else t[7] }}{% if t[7]|length > 300 %}...{% endif %}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {%else%}
+        <br><br><br><br>
+        
+
+    </div>
+    
+        {% endif %}
+    </div>
+
+    </div>
+</div>
+</div>
+</center>
+<script>
+    function editDescription() {
+        var descriptionElement = document.getElementById('description');
+        var descriptionTextarea = document.getElementById('descriptionTextarea');
+        var currentDescription = descriptionElement.textContent.trim();
+        var formattedDescription = currentDescription.replace(/\n/g, '<br>');
+        descriptionElement.style.display = 'none';
+        descriptionTextarea.style.display = 'block';
+        descriptionTextarea.value = formattedDescription;
+        descriptionTextarea.focus();
+        descriptionTextarea.onblur = function() {
+            var newDescription = descriptionTextarea.value.trim();
+            var formattedNewDescription = newDescription.replace(/<br>/g, '\n');
+            descriptionElement.textContent = formattedNewDescription === '' ? 'Добавить описание' : formattedNewDescription;
+            descriptionElement.style.display = 'block';
+            descriptionTextarea.style.display = 'none';
+        };
+        autoResize();
+    };
+    function autoResize() {
+        const textarea = document.getElementById("descriptionTextarea");
+        textarea.style.height = "auto";
+        textarea.style.height = textarea.scrollHeight + "px";
+    }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const progressBar = document.getElementById('progress');
+        const expValue = document.querySelector('.level_and_exp p').textContent.split('/')[0];
+        const totalValue = document.querySelector('.level_and_exp p').textContent.split('/')[1];
+        const progressWidth = (expValue / totalValue) * 100;
+        progressBar.style.width = progressWidth + '%';
+    });
+</script>
+{% endblock %}

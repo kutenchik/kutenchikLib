@@ -1,0 +1,231 @@
+{% extends "baza.html" %}
+{% block content %}
+<br><br><br>  
+<div class='nameAndChapters'>
+  <div class="onlyNameAndChapters">
+    <a href="{{url_for('showTitle',nazvanie=dlyaUrl)}}"><h2>{{title}}</h2></a>
+    <button id="toggleButton">&#9776;</button>
+  </div>
+  <div id="sidebarGlavi">
+    <div class="sidebar-header">
+      <span>Оглавление</span>
+      <button id="closeButton">&times;</button>
+    </div>
+    <ul>
+      {% for glava in glavi %}
+      {% if 'Глава' in glava[1] %}
+        {% if cur_glava==glava[1] %}
+        <a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=glava[0])}}"><li style='background-color:#f0f0f0'>{{glava[1]}}{% if readed_chapters%}{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{%endif%}{% endfor %}{%endif%}</li></a>
+        {% else %}
+        <a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=glava[0])}}"><li>{{glava[1]}}{% if readed_chapters%}{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{%endif%}{% endfor %}{%endif%}</li></a>
+        {% endif %}
+      {% else %}
+        {% if cur_glava==glava[1] %}
+        <a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=glava[0])}}"><li style='background-color:#f0f0f0'><i>{{glava[1]}}</i>{% if readed_chapters%}{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{%endif%}{% endfor %}{%endif%}</li></a>
+        {% else %}
+        <a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=glava[0])}}"><li><i>{{glava[1]}}</i>{% if readed_chapters%}{% for r in readed_chapters %}{% if r[0]==glava[0] %} &#10004;{%endif%}{% endfor %}{%endif%}</li></a>
+        {% endif %}
+      {% endif %}
+      {% endfor %}
+    </ul>
+    <br><br><br>
+  </div>
+</div>
+
+
+<div style="max-width: 90%;margin: 0 auto;margin-left: 6%;" id="carouselExampleControls" class="carousel slide" data-ride="carousel" data-interval="false">
+  <div class="carousel-inner" style='background:white'>
+    <div class="carousel-item active" style='background:white'>
+      <img class="d-block mx-auto" style='max-height:1200px;' src="{{first_page}}" alt="First slide">
+    </div>
+    {% for page in pages %}
+    <div class="carousel-item" style='background:white'>
+      <img class="d-block mx-auto" style='max-height:1200px;' src="{{page}}" alt="Second slide">
+    </div>
+    {% endfor %}
+  </div>
+  <a class="carousel-control-prev" style="width: 50%;" href="#carouselExampleControls" role="button" data-slide="prev">
+    <span class="carousel-control" aria-hidden="true"></span>
+    <span class="sr-only">Previous</span>
+  </a>
+  <a class="carousel-control-next" style="width: 50%;" href="#carouselExampleControls" role="button" data-slide="next">
+    <span class="carousel-control" aria-hidden="true"></span>
+    <span class="sr-only">Next</span>
+  </a>
+</div>
+<div style="text-align: center; margin-top: 20px;">
+  <label for="pageSelect">Выберите страницу:</label>
+  <select id="pageSelect" onchange="changePage(this)">
+    <option value="0">Страница 1/{{pages|length+1}}</option>
+    {% for i in range(1, pages|length + 1) %}
+      <option value="{{ i }}">Страница {{ i+1 }}/{{pages|length+1}}</option>
+    {% endfor %}
+  </select>
+</div>
+<script>
+  function changePage(select) {
+    var selectedIndex = select.value;
+    $('#carouselExampleControls').carousel(parseInt(selectedIndex));
+  }
+  document.addEventListener("DOMContentLoaded", function() {
+    var pageSelect = document.getElementById('pageSelect');
+    var carousel = document.getElementById('carouselExampleControls');
+    var firstPage = 0;
+    var lastPage = {{ pages|length  }};
+    carousel.addEventListener('slid.bs.carousel', function() {
+      var activeSlide = $('#carouselExampleControls .carousel-item.active');
+      var index = $('.carousel-item').index(activeSlide);
+
+      pageSelect.selectedIndex = index + 1;
+    });
+    $('#carouselExampleControls').on('slid.bs.carousel', function (event) {
+      var currentIndex = $(this).find('.carousel-item.active').index();
+      var ogo=document.getElementById('pageSelect')
+      ogo.selectedIndex=currentIndex
+    });
+    pageSelect.addEventListener('change', function() {
+      var selectedIndex = parseInt(pageSelect.value);
+      $('#carouselExampleControls').carousel(selectedIndex);
+    });
+
+    var carouselPrev = document.querySelector('.carousel-control-prev');
+    var carouselNext = document.querySelector('.carousel-control-next');
+    carouselPrev.addEventListener('click', function(e) {
+      var currentSlideIndex = $('.carousel-item.active').index();
+      if (currentSlideIndex === firstPage) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    });
+
+    carouselNext.addEventListener('click', function(e) {
+      var currentSlideIndex = $('.carousel-item.active').index();
+      if (currentSlideIndex === lastPage) {
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    });
+  });
+</script>
+<div style='display:flex;justify-content:space-evenly'>
+{% if nomer>1 %}
+<a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer-1)}}">
+  <div class="prevGlava">
+      <b>Предыдущая глава</b>
+  </div>
+</a>
+{% else %}
+<a style='visibility:hidden' href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer-1)}}">
+  <div class="prevGlava">
+      <b>Предыдущая глава</b>
+  </div>
+</a>
+{% endif %}
+{% if nomer==last_glava %}
+<a style='visibility:hidden' href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer-1)}}">
+  <div class="prevGlava">
+      <b>Предыдущая глава</b>
+  </div>
+</a>
+{% endif %}
+{% if nomer!=last_glava and nomer!=1 %}
+<a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer+1)}}">
+  <div  class="nextGlava1">
+      <b>Следующая глава</b>
+  </div>
+</a>
+{% endif %}
+{% if nomer!=last_glava and nomer==1 %}
+<a href="{{url_for('showGlava',nazvanie=dlyaUrl,nomer_glavi=nomer+1)}}">
+  <div  class="nextGlava1">
+      <b>Следующая глава</b>
+  </div>
+</a>
+{% endif %}
+</div>
+<div>
+<section class="content-item" id="comments">
+  <div class="container">   
+    <div class="row">
+          <div class="col-sm-8">   
+              <form method="POST">
+                <h3 class="pull-left">Новый коммент</h3>
+                  <fieldset>
+                      <div class="row">
+                          <div class="col-sm-3 col-lg-2 hidden-xs">
+                            {% if current_user.get_profilePic()=='https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Circle-icons-profile.svg/1200px-Circle-icons-profile.svg.png' %}
+                            <img class="user_pfp" src="{{current_user.get_profilePic()}}" alt="">
+                            {% else %}
+                            <img class="user_pfp" src="..\..\{{current_user.get_profilePic()}}" alt="">
+                            {% endif %}
+                          </div>
+                          <div class="form-group col-xs-12 col-sm-9 col-lg-10">
+                              <textarea name='comment_input' class="form-control" id="message" placeholder="Ваш коммент"  oninput="autoResize()" style='resize:none;overflow-y:hidden' required=""></textarea>
+                          </div>
+                      </div>  	
+                  </fieldset>
+                  <button type="submit" class="btn btn-normal pull-right">Отправить</button>
+              </form>
+              
+              {% if comments %}
+              <h3>{{kolvo_com}} коммента</h3>
+              {% for c in comments %}
+              <div class="media">
+                {% if c[1] %}
+                <a class="pull-left" href="{{url_for('showProfile',username=c[0])}}"><img class="media-object" src="..\..\{{c[1]}}" alt=""></a>
+                {% else %}
+                <a class="pull-left" href="{{url_for('showProfile',username=c[0])}}"><img class="media-object" src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Circle-icons-profile.svg/1200px-Circle-icons-profile.svg.png" alt=""></a>
+                {% endif %}
+                  <div class="media-body">
+                      <h4 class="media-heading">{{c[0]}}</h4>
+                      <p>{{c[2].replace('\n', '<br>')|safe}}</p>
+                      <ul class="list-unstyled list-inline media-detail pull-left">
+                          <li><i class="fa fa-calendar"></i>{{c[3]}}</li>
+                      </ul>
+                      {% if current_user.get_username()==c[0] or current_user.get_status()=='Админ' %}
+                      <button style="color: red;border:none;background-color:inherit" class="deleteBtn pull-right" data-comment-id="{{ c[4] }}">Удалить</button>
+                      {% endif %}
+                  </div>
+              </div>
+              {% endfor %}
+              {% endif %}
+          </div>
+      </div>
+  </div>
+</section>
+<script>
+  function autoResize() {
+    const textarea = document.getElementById("message");
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+  }
+  const toggleButton = document.getElementById('toggleButton');
+  const closeButton = document.getElementById('closeButton');
+  const sidebarGlavi = document.getElementById('sidebarGlavi');
+
+  toggleButton.addEventListener('click', function() {
+    sidebarGlavi.style.right = '0';
+  });
+
+  closeButton.addEventListener('click', function() {
+    sidebarGlavi.style.right = '-100%';
+  }); 
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.deleteBtn').forEach(function(button) {
+          button.addEventListener('click', function() {
+              var commentId = this.getAttribute('data-comment-id');
+
+              fetch('/delete_comment', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ comment_id: commentId }),
+              });
+          });
+      });
+  });
+</script>
+{% endblock %}
